@@ -1,20 +1,43 @@
 # Real_Time_Kpi_Alert_System
 Automated KPI monitoring system with anomaly detection and alerting (Python + SQL)
-# Clone and setup
-git clone (https://github.com/Nivpatel23/Real_Time_Kpi_Alert_System)
-cd real-time-kpi-alert-system
+# 🚨 Real-Time KPI Alert System
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate        # Linux/Mac
-# venv\Scripts\activate         # Windows
+A production-grade anomaly detection and alerting system that monitors KPI data, 
+detects statistical anomalies using multiple strategies, stores historical data in SQL, 
+and sends automated alerts via email and database logging.
 
-# Install dependencies
-pip install -r requirements.txt
+**Built as a portfolio project demonstrating Data Engineering, Python, SQL, 
+and system design skills.**
 
-# Create environment file
-cp .env.example .env
-# Edit .env with your actual credentials
+![Python](https://img.shields.io/badge/Python-3.9+-blue?logo=python)
+![SQLite](https://img.shields.io/badge/Database-SQLite-003B57?logo=sqlite)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-# Create necessary directories
-mkdir -p data logs
+---
+
+## 📐 Architecture
+
+```text
+Data Sources (Yahoo Finance / Simulated)
+        │
+        ▼
+  Ingestion Layer (fetch, validate, normalize)
+        │
+        ▼
+  SQL Database (kpi_readings, alerts, thresholds)
+        │
+        ▼
+  Anomaly Detection Engine
+  ├── Static Threshold Breach
+  ├── Z-Score Outlier Detection
+  ├── Rolling Average Deviation
+  └── % Change Spike Detection
+        │
+        ▼
+  Alert Manager
+  ├── Console / Log Output
+  ├── SQL Alert Logging (audit trail)
+  └── Email Digest (SMTP)
+        │
+        ▼
+  Dashboard (Power BI / Streamlit) [Optional]
