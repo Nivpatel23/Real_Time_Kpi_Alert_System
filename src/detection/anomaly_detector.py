@@ -278,3 +278,164 @@ class AnomalyDetector:
 
         WHY: Catches sudden shocks that might not breach absolute thresholds
         or z-score limits (e.g., a stock drops 
+    def _check_pct_change(
+        self,
+        kpi_name: str,
+        values: np.ndarray,
+        latest_value: float,
+        threshold: KPIThreshold,
+        symbol: Optional[str],
+    ) -> List[AnomalyResult]:
+        """
+        Check if the latest value changed by more than X% from the previous value.
+
+        WHY: Catches sudden shocks that might not breach absolute thresholds
+        or z-score limits (e.g., a stock drops 8% but is still within 
+        historical range). Percentage change detects velocity of change,
+        not just magnitude.
+        """
+        previous_value = values[-2] if len(values) >= 2 else None
+
+        if previous_value is None or previous_value == 0:
+            return []
+
+        pct_change = (latest_value - previous_value) / abs(previous_value)
+
+        if abs(pct_change) > threshold.pct_change_threshold:
+            direction = "INCREASE" if pct_change > 0 else "DECREASE"
+            severity = self._pct_change_to_severity(abs(pct_change), threshold.pct_change_threshold)
+
+            return [AnomalyResult(
+                kpi_name=kpi_name,
+                alert_type="pct_change_spike",
+                severity=severity,
+                message=(
+                    f"{kpi_name} {direction} of {pct_change:+.2%} detected. "
+                    f"Previous: {previous_value:.4f} → Current: {latest_value:.4f} "
+                    f"(threshold: ±{threshold.pct_change_threshold:.0%})"
+                ),
+                kpi_value=latest_value,
+                threshold_value=threshold.pct_change_threshold,
+                symbol=symbol,
+            )]
+
+        return []
+
+    # ─── Severity Classifiers ──────────────────────────────────────
+
+    @staticmethod
+    def _z_score_to_severity(z: float) -> str:
+        """
+        Map z-score magnitude to alert severity.
+
+        WHY: Not all anomalies are equally urgent. A z-score of 2.5 is
+        noteworthy; a z-score of 5.0 is a system-on-fire situation.
+        Graduated severity prevents alert fatigue.
+        """
+        if z > 4.0:
+            return "CRITICAL"
+        elif z > 3.0:
+            return "HIGH"
+        elif z > 2.5:
+            return "MEDIUM"
+        else:
+            return "LOW"
+
+    @staticmethod
+    def _pct_change_to_severity(pct: float, threshold: float) -> str:
+        """Map percentage change magnitude to severity."""
+        ratio = pct / threshold  # How many multiples of the threshold
+        if ratio > 5.0:
+            return "CRITICAL"
+        elif ratio > 3.0:
+            return "HIGH"
+        elif ratio > 1.5:
+            return "MEDIUM"
+        else:
+            return "LOW"
+
+    # ─── Threshold Resolution ──────────────────────────────────────
+
+    def _get_threshold(self, kpi_name: str) -> KPIThreshold:
+        """
+        Resolve threshold config for a KPI.
+
+        Priority: DB thresholds > Config thresholds > Default fallback
+        
+        WHY: This hierarchy lets business users override thresholds via
+        a dashboard (writing to DB) without needing code changes, while
+        falling back to sensible defaults for new/unknown KPIs.
+        """
+        # Check config-defined thresholds
+        if kpi_name in self.detection_config.default_thresholds:
+            return self.detection_config.default_thresholds[kpi_name]
+
+        # Fallback: generic threshold for unknown KPIs
+        logger.debug(f"No specific threshold for '{kpi_name}'. Using generic defaults.")
+        return KPIThreshold(
+            kpi_name=kpi_name,
+            z_score_threshold=2.5,
+            rolling_window=20,
+            pct_change_threshold=0.10,
+        )
+
+    # ─── Batch Analysis ────────────────────────────────────────────
+
+    def analyze_batch(
+        self,
+        data: pd.DataFrame,
+        history_lookup: dict = None,
+    ) -> List[AnomalyResult]:
+        """
+        Analyze multiple KPIs from a single DataFrame in one call.
+
+        Args:
+            data: Full dataset with 'kpi_name', 'value', 'timestamp', optionally 'symbol'
+            history_lookup: Pre-fetched history dict {(kpi_name, symbol): DataFrame}
+                           If None, uses the data itself as history.
+
+        Returns:
+            Aggregated list of all anomalies across all KPIs
+        """
+        all_anomalies: List[AnomalyResult] = []
+
+        # Group by (kpi_name, symbol) to analyze each series independently
+        group_cols = ["kpi_name"]
+        if "symbol" in data.columns and data["symbol"].notna().any():
+            group_cols.append("symbol")
+
+        for group_key, group_df in data.groupby(group_cols):
+            if isinstance(group_key, str):
+                kpi_name = group_key
+                symbol = None
+            else:
+                kpi_name = group_key[0]
+                symbol = group_key[1] if len(group_key) > 1 else None
+
+            # Sort chronologically
+            group_df = group_df.sort_values("timestamp").reset_index(drop=True)
+
+            if len(group_df) < 2:
+                continue
+
+            # Use provided history or the group itself
+            if history_lookup and (kpi_name, symbol) in history_lookup:
+                history = history_lookup[(kpi_name, symbol)]
+            else:
+                history = group_df
+
+            latest_value = float(group_df["value"].iloc[-1])
+
+            anomalies = self.analyze(
+                kpi_name=kpi_name,
+                history=history,
+                latest_value=latest_value,
+                symbol=symbol,
+            )
+            all_anomalies.extend(anomalies)
+
+        logger.info(
+            f"Batch analysis complete: {len(all_anomalies)} anomalies "
+            f"detected across {data['kpi_name'].nunique()} KPIs."
+        )
+        return all_anomalies
