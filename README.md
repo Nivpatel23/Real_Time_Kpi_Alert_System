@@ -1,7 +1,7 @@
 # Real_Time_Kpi_Alert_System
 Automated KPI monitoring system with anomaly detection and alerting (Python + SQL)
 # Clone and setup
-git clone https://github.com/YOUR_USERNAME/real-time-kpi-alert-system.git
+git clone (https://github.com/Nivpatel23/Real_Time_Kpi_Alert_System)
 cd real-time-kpi-alert-system
 
 # Create virtual environment
