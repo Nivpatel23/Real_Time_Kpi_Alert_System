@@ -1,5 +1,47 @@
 MIT License
 
+
+---
+
+## STEP 13: Production Improvements & Deployment
+
+### 13A: Power BI Integration
+
+### `dashboards/powerbi_integration.md`
+```markdown
+# Power BI Integration Guide
+
+## Connecting Power BI to SQLite
+
+1. Install the SQLite ODBC driver:
+   https://www.ch-werner.de/sqliteodbc/
+
+2. In Power BI Desktop:
+   - Get Data → ODBC → Select SQLite DSN
+   - Or use Python script as data source
+
+3. Python Script Data Source in Power BI:
+
+```python
+import sqlite3
+import pandas as pd
+
+conn = sqlite3.connect("C:/path/to/data/kpi_alerts.db")
+
+# Load KPI readings
+kpi_data = pd.read_sql("SELECT * FROM kpi_readings ORDER BY timestamp", conn)
+
+# Load alerts
+alerts = pd.read_sql("SELECT * FROM alerts ORDER BY triggered_at DESC", conn)
+
+# Load summary
+alert_summary = pd.read_sql("""
+    SELECT kpi_name, severity, COUNT(*) as count,
+           MAX(triggered_at) as last_alert
+    FROM alerts GROUP BY kpi_name, severity
+""", conn)
+
+conn.close()
 Copyright (c) 2026 Nivpatel23
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
