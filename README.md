@@ -1,6 +1,4 @@
-# Real_Time_Kpi_Alert_System
-Automated KPI monitoring system with anomaly detection and alerting (Python + SQL)
-# 🚨 Real-Time KPI Alert System
+#  Real-Time KPI Alert System
 
 A production-grade anomaly detection and alerting system that monitors KPI data, 
 detects statistical anomalies using multiple strategies, stores historical data in SQL, 
