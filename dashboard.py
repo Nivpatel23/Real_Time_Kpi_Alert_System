@@ -63,12 +63,12 @@ if "run_metadata" not in st.session_state:
 def render_sidebar():
     """Sidebar with data source selection, threshold controls, and run button."""
 
-    st.sidebar.markdown("# 🚨 KPI Alert System")
+    st.sidebar.markdown("#  KPI Alert System")
     st.sidebar.markdown("### Interactive Demo")
     st.sidebar.markdown("---")
 
     # ─── Data Source ───────────────────────────────────────
-    st.sidebar.markdown("## 📊 Data Source")
+    st.sidebar.markdown("##  Data Source")
 
     data_source = st.sidebar.selectbox(
         "Choose Data Source",
@@ -119,15 +119,15 @@ def render_sidebar():
 
     # ─── Run Pipeline Button ───────────────────────────────
     run_clicked = st.sidebar.button(
-        "🚀 Run Pipeline",
+        " Run Pipeline",
         type="primary",
         use_container_width=True,
     )
 
     st.sidebar.markdown("---")
     st.sidebar.markdown(
-        "**Built by [Your Name](https://github.com/YOUR_USERNAME)**\n\n"
-        "[📂 View Source Code](https://github.com/YOUR_USERNAME/real-time-kpi-alert-system)"
+        "**Built by [Niv Patel](https://github.com/Nivpatel23/Real_Time_Kpi_Alert_System)**\n\n"
+        "[📂 View Source Code](https://github.com/Nivpatel23/Real_Time_Kpi_Alert_System)"
     )
 
     return {
