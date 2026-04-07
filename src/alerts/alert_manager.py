@@ -86,7 +86,7 @@ class AlertManager:
         count = 0
 
         logger.info("=" * 70)
-        logger.info(f"  🚨 ALERT REPORT — {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        logger.info(f"  ALERT REPORT — {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         logger.info(f"  Total Anomalies Detected: {len(anomalies)}")
         logger.info("=" * 70)
 
@@ -220,7 +220,7 @@ class AlertManager:
         html = f"""
         <html>
         <body style="font-family:Arial,sans-serif;color:#333;">
-            <h2 style="color:#dc3545;">🚨 KPI Alert Report</h2>
+            <h2 style="color:#dc3545;"> KPI Alert Report</h2>
             <p><strong>Time:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
             <p><strong>Total Anomalies:</strong> {len(anomalies)}</p>
             <table style="border-collapse:collapse;width:100%;margin-top:10px;">
@@ -252,7 +252,7 @@ class AlertManager:
         """Plain text fallback for email clients that don't render HTML."""
         lines = [
             "=" * 50,
-            "🚨 KPI ALERT REPORT",
+            " KPI ALERT REPORT",
             f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
             f"Total Anomalies: {len(anomalies)}",
             "=" * 50,
