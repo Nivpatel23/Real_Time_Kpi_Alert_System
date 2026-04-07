@@ -37,7 +37,7 @@ def run_single(data_source: str) -> None:
     pipeline = KPIPipeline(data_source=data_source)
     metadata = pipeline.run()
 
-    logger.info("\n📊 Run Metadata:")
+    logger.info("\n Run Metadata:")
     logger.info(json.dumps(metadata, indent=2, default=str))
 
     # Print alert summary from database
@@ -55,13 +55,13 @@ def run_demo() -> None:
     Demo mode: runs simulated data, shows results, prints summary.
     Perfect for portfolio presentations and interviews.
     """
-    logger.info("🎯 DEMO MODE — Running with simulated data + anomaly injection...\n")
+    logger.info(" DEMO MODE — Running with simulated data + anomaly injection...\n")
 
     pipeline = KPIPipeline(data_source="simulated")
     metadata = pipeline.run()
 
     print("\n" + "=" * 60)
-    print("  📊 DEMO RESULTS SUMMARY")
+    print("   DEMO RESULTS SUMMARY")
     print("=" * 60)
     print(f"  Status:           {metadata['status']}")
     print(f"  Rows Ingested:    {metadata['rows_ingested']}")
@@ -81,10 +81,10 @@ def print_alert_summary() -> None:
         summary = db_ops.get_alert_summary()
 
         if summary.empty:
-            print("\n  ℹ️  No alerts in database yet.")
+            print("\n    No alerts in database yet.")
             return
 
-        print("\n  📋 ALERT SUMMARY (All Time):")
+        print("\n   ALERT SUMMARY (All Time):")
         print("  " + "-" * 55)
         print(f"  {'KPI':<25} {'Severity':<12} {'Count':<8}")
         print("  " + "-" * 55)
@@ -108,7 +108,7 @@ def print_recent_alerts(hours: int = 24) -> None:
         if recent.empty:
             return
 
-        print(f"\n  🕐 RECENT ALERTS (Last {hours}h):")
+        print(f"\n   RECENT ALERTS (Last {hours}h):")
         print("  " + "-" * 70)
 
         for _, row in recent.head(10).iterrows():
